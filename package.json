@@ -1,0 +1,17 @@
+{
+  "name": "async-extensions",
+  "version": "0.3.1",
+  "description": "An extension library for ts/js with async helpers using Promises control flow and async/await syntax!",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "repository": "github:Sciulio/async-extensions",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Sciulio <sciulio@msn.com>",
+  "license": "ISC",
+  "dependencies": {
+  },
+  "devDependencies": {
+  }
+}
