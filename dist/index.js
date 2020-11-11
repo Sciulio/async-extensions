@@ -1,12 +1,17 @@
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+function NOOP() { }
+function isCatchHandler(value) {
+    return typeof value == "function";
+}
 Array.prototype.mapAsync = function (cback, defaultValueOrCatchHandler) {
     return __awaiter(this, void 0, void 0, function* () {
         if (defaultValueOrCatchHandler) {
@@ -15,7 +20,7 @@ Array.prototype.mapAsync = function (cback, defaultValueOrCatchHandler) {
                     return yield cback(item, idx);
                 }
                 catch (e) {
-                    if (typeof defaultValueOrCatchHandler == "function") {
+                    if (isCatchHandler(defaultValueOrCatchHandler)) {
                         return defaultValueOrCatchHandler(e, item, idx);
                     }
                 }
@@ -28,7 +33,7 @@ Array.prototype.mapAsync = function (cback, defaultValueOrCatchHandler) {
         }
     });
 };
-Array.prototype.forEachAsync = function (cback, catchHandler) {
+Array.prototype.forEachAsync = function (cback, catchHandler = NOOP) {
     return __awaiter(this, void 0, void 0, function* () {
         yield this.mapAsync(cback, catchHandler);
     });
@@ -43,7 +48,7 @@ Array.prototype.filterAsync = function (cback, defaultValueOrCatchHandler) {
                     indices.push(idx);
                 }
             }), (err, item, idx) => {
-                if (typeof defaultValueOrCatchHandler == "function" ?
+                if (isCatchHandler(defaultValueOrCatchHandler) ?
                     defaultValueOrCatchHandler(err, item, idx) :
                     defaultValueOrCatchHandler) {
                     indices.push(idx);

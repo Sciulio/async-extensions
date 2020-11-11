@@ -1,5 +1,5 @@
-type tCatchHandler<T> = (err: Error, item: T, idx: number) => void;
-type tDefaultValueOrCatchHandler<T, W> = W | ((err: Error, item: T, idx: number) => W)
+type tCatchHandler<T, W = void> = (err: Error, item: T, idx: number) => W;
+type tDefaultValueOrCatchHandler<T, W> = W | tCatchHandler<T, W>
 
 interface Array<T> {
   mapAsync<W>(
@@ -18,6 +18,12 @@ interface Array<T> {
   ): Promise<T[]>;
 }
 
+function NOOP() {}
+
+function isCatchHandler<T, W>(value: any): value is tCatchHandler<T, W> {
+  return typeof value == "function";
+}
+
 Array.prototype.mapAsync = async function <T, W>(
   cback: (item: T, idx: number) => Promise<W>,
   defaultValueOrCatchHandler?: tDefaultValueOrCatchHandler<T, W>
@@ -27,7 +33,7 @@ Array.prototype.mapAsync = async function <T, W>(
       try {
         return await cback(item, idx);
       } catch (e) {
-        if (typeof defaultValueOrCatchHandler == "function") {
+        if (isCatchHandler<T, W>(defaultValueOrCatchHandler)) {
           return defaultValueOrCatchHandler(e, item, idx);
         }
       }
@@ -41,7 +47,7 @@ Array.prototype.mapAsync = async function <T, W>(
 
 Array.prototype.forEachAsync = async function <T>(
   cback: (item: T, idx: number) => Promise<void>,
-  catchHandler?: (err: Error, item: T, idx: number) => void
+  catchHandler: tCatchHandler<T> = NOOP
 ): Promise<void> {
   await this.mapAsync(cback, catchHandler);
 }
@@ -59,7 +65,7 @@ Array.prototype.filterAsync = async function <T>(
         indices.push(idx);
       }
     }, (err, item, idx) => {
-      if (typeof defaultValueOrCatchHandler == "function" ?
+      if (isCatchHandler(defaultValueOrCatchHandler) ?
         defaultValueOrCatchHandler(err, item, idx) :
         defaultValueOrCatchHandler
       ) {
