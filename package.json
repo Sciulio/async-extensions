@@ -1,6 +1,6 @@
 {
   "name": "async-extensions",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "An extension library for ts/js with async helpers using Promises control flow and async/await syntax!",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
